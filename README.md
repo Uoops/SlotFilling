@@ -20,20 +20,15 @@ We also have a follow-up IEEE paper:
 This code allows to get state-of-the-art results and a significant improvement
 (+1% in F1-score) with respect to the results presented in the paper.
 
-In order to reproduce the results, make sure Theano is installed and the
-repository is in your `PYTHONPATH`, e.g run the command
-`export PYTHONPATH=/path/where/is13/is:$PYTHONPATH`. Then, run the following
-commands:
+Run the following commands:
 
 ```
-git clone git@github.com:mesnilgr/is13.git
-python is13/examples/elman-forward.py
-```
-
-For running the Jordan architecture:
-
-```
-python is13/examples/jordan-forward.py
+git clone https://github.com/Liang-Qiu/is13.git
+cd is13
+virtualenv venv -p python3
+source venv/bin/activate
+pip3 install -r requirements-gpu.txt
+python examples/elman-keras.py
 ```
 
 ## ATIS Data
@@ -41,8 +36,8 @@ python is13/examples/jordan-forward.py
 Download ATIS Dataset here! [split 0](http://lisaweb.iro.umontreal.ca/transfert/lisa/users/mesnilgr/atis/atis.fold0.pkl.gz) [split 1](http://lisaweb.iro.umontreal.ca/transfert/lisa/users/mesnilgr/atis/atis.fold1.pkl.gz) [split 2](http://lisaweb.iro.umontreal.ca/transfert/lisa/users/mesnilgr/atis/atis.fold2.pkl.gz) [split 3](http://lisaweb.iro.umontreal.ca/transfert/lisa/users/mesnilgr/atis/atis.fold3.pkl.gz) [split 4](http://lisaweb.iro.umontreal.ca/transfert/lisa/users/mesnilgr/atis/atis.fold4.pkl.gz)
 
 ```
-import cPickle
-train, test, dicts = cPickle.load(open("atis.pkl"))
+import _pickle as cPickle
+train, valid, test, dicts = cPickle.load(gzip.open('atis.fold0.pkl.gz', 'rb'), encoding='latin1')
 ```
 
 `dicts` is a python dictionnary that contains the mapping from the labels, the

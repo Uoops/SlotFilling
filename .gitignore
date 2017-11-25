@@ -1,3 +1,8 @@
 *.pkl
 *.gz
 *.pyc
+*.h5
+venv/
+.idea/
+out/
+weights/
