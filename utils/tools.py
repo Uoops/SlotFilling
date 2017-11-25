@@ -1,5 +1,6 @@
 import random
 
+
 def shuffle(lol, seed):
     '''
     lol :: list of list as input
@@ -11,6 +12,7 @@ def shuffle(lol, seed):
         random.seed(seed)
         random.shuffle(l)
 
+
 def minibatch(l, bs):
     '''
     l :: list of word idxs
@@ -21,10 +23,11 @@ def minibatch(l, bs):
     will output:
     [[0],[0,1],[0,1,2],[1,2,3]]
     '''
-    out  = [l[:i] for i in xrange(1, min(bs,len(l)+1) )]
-    out += [l[i-bs:i] for i in xrange(bs,len(l)+1) ]
+    out = [l[:i] for i in xrange(1, min(bs, len(l) + 1))]
+    out += [l[i - bs:i] for i in xrange(bs, len(l) + 1)]
     assert len(l) == len(out)
     return out
+
 
 def contextwin(l, win):
     '''
@@ -34,12 +37,11 @@ def contextwin(l, win):
     to context windows surrounding each word in the sentence
     '''
     assert (win % 2) == 1
-    assert win >=1
+    assert win >= 1
     l = list(l)
 
-    lpadded = win/2 * [-1] + l + win/2 * [-1]
-    out = [ lpadded[i:i+win] for i in range(len(l)) ]
+    lpadded = win / 2 * [-1] + l + win / 2 * [-1]
+    out = [lpadded[i:i + win] for i in range(len(l))]
 
     assert len(out) == len(l)
     return out
-

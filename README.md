@@ -26,7 +26,10 @@ repository is in your `PYTHONPATH`, e.g run the command
 commands:
 
 ```
-git clone git@github.com:mesnilgr/is13.git
+git clone https://github.com/Liang-Qiu/is13.git
+virtualenv venv -p python3
+source venv/bin/activate
+pip3 install -r requirements-gpu.txt
 python is13/examples/elman-forward.py
 ```
 
