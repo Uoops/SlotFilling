@@ -6,7 +6,7 @@ import os
 import random
 
 from keras.models import Sequential
-from keras.layers import Input, Embedding, SimpleRNN, Dense, Activation, TimeDistributed
+from keras.layers import Input, Embedding, SimpleRNN, Dense, Activation, TimeDistributed, LSTM, Bidirectional
 from keras.optimizers import SGD
 from keras.utils.np_utils import to_categorical
 
@@ -14,6 +14,7 @@ sys.path.append('../')
 from is13.data import load
 from is13.metrics.accuracy import conlleval
 from is13.utils.tools import shuffle
+from is13.pysts.kerasts.objectives import categorical_crossentropy
 
 if __name__ == '__main__':
 
@@ -23,7 +24,9 @@ if __name__ == '__main__':
          'nhidden': 100,  # number of hidden units
          'seed': 345,
          'emb_dimension': 100,  # dimension of word embedding
-         'nepochs': 5}
+         'nepochs': 30}
+
+    s['loss'] = categorical_crossentropy
 
     folder = os.path.join('out/', os.path.basename(__file__).split('.')[0])  # folder = 'out/elman-keras'
     os.makedirs(folder, exist_ok=True)
@@ -31,9 +34,10 @@ if __name__ == '__main__':
     # load the dataset
     train_set, valid_set, test_set, dic = load.atisfold(s['fold'])
     idx2label = dict((k, v) for v, k in dic['labels2idx'].items())
+    print(idx2label[74])
     idx2word = dict((k, v) for v, k in dic['words2idx'].items())
 
-    train_lex, train_ne, train_y = train_set
+    train_lex, train_ne, train_y = train_set  # one-hot vector TODO Glove?
     valid_lex, valid_ne, valid_y = valid_set
     test_lex, test_ne, test_y = test_set
 
@@ -47,12 +51,14 @@ if __name__ == '__main__':
 
     model = Sequential()
     model.add(Embedding(vocsize, s['emb_dimension']))
-    model.add(SimpleRNN(s['nhidden'], activation='sigmoid', return_sequences=True))
+    # model.add(SimpleRNN(s['nhidden'], activation='sigmoid', return_sequences=True))
+    model.add(Bidirectional(LSTM(s['nhidden'], activation='sigmoid', return_sequences=True)))
     model.add(TimeDistributed(Dense(units=nclasses)))
     model.add(Activation("softmax"))
 
     sgd = SGD(lr=s['lr'], momentum=0.0, decay=0.0, nesterov=False)
-    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+    #model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+    model.compile(loss=s['loss'], optimizer=sgd, metrics=['accuracy'])
 
     # train with early stopping on validation set
     best_f1 = -np.inf
@@ -63,7 +69,9 @@ if __name__ == '__main__':
         tic = time.time()
         for i in range(nsentences):
             X = np.asarray([train_lex[i]])
+            # For use with categorical_crossentropy
             Y = to_categorical(np.asarray(train_y[i])[:, np.newaxis], nclasses)[np.newaxis, :, :]
+            # print(Y.shape)
             if X.shape[1] == 1:
                 continue  # bug with X, Y of len 1
             model.train_on_batch(X, Y)
@@ -75,14 +83,12 @@ if __name__ == '__main__':
 
         # evaluation // back into the real world : idx -> words
         predictions_test = [map(lambda x: idx2label[x],
-                                model.predict_on_batch(np.asarray([x])).argmax(2)[0])
-                            for x in test_lex]
-        groundtruth_test = [map(lambda x: idx2label[x], y) for y in test_y]
+                                model.predict_on_batch(np.asarray([x])).argmax(2)[0]) for x in test_lex]
+        groundtruth_test = [map(lambda x: idx2label[x], y) for y in test_y]  # result is word,not idx #(function, list)
         words_test = [map(lambda x: idx2word[x], w) for w in test_lex]
 
         predictions_valid = [map(lambda x: idx2label[x],
-                                 model.predict_on_batch(np.asarray([x])).argmax(2)[0])
-                             for x in valid_lex]
+                                 model.predict_on_batch(np.asarray([x])).argmax(2)[0]) for x in valid_lex]
         groundtruth_valid = [map(lambda x: idx2label[x], y) for y in valid_y]
         words_valid = [map(lambda x: idx2word[x], w) for w in valid_lex]
 

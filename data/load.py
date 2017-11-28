@@ -64,21 +64,29 @@ if __name__ == '__main__':
     # w2ne, w2la = {}, {}  # word2named_entities, word2labels
     # train, test, dic = atisfull()
     train, _, test, dic = atisfold(1)
+    # print(dic)
 
     w2idx, ne2idx, labels2idx = dic['words2idx'], dic['tables2idx'], dic['labels2idx']
 
     idx2w = dict((v, k) for k, v in w2idx.items())
     idx2ne = dict((v, k) for k, v in ne2idx.items())
     idx2la = dict((v, k) for k, v in labels2idx.items())
-
+    # print(idx2w)
     test_x, test_ne, test_label = test
     train_x, train_ne, train_label = train
+    # print('\n' + 'data are' + '\n')
+    # print(train_x)
+    # print('\n' + 'be are' + '\n')
+    # print(train_ne)
+    # print('\n' + 'Labels are' + '\n')
+    # print(train_label)
     wlength = 35
 
     for e in ['train', 'test']:
+        # display train first, then test
         for sw, se, sl in zip(eval(e + '_x'), eval(e + '_ne'), eval(e + '_label')):  # one sentence
             print('WORD'.rjust(wlength), 'LABEL'.rjust(wlength))  # text is aligned along the right margin
             for wx, la in zip(sw, sl):  # one word
                 print(idx2w[wx].rjust(wlength), idx2la[la].rjust(wlength))
-            print('\n' + '**' * 30 + '\n')
+            print('\n' + '**' * 36 + '\n')
             pdb.set_trace()  # python debugger
