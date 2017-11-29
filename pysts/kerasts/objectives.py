@@ -6,7 +6,7 @@ A variety of objectives that may make sense in the sentence pair setting.
 """
 
 import keras.backend as K
-
+import numpy as np
 
 def ranknet(y_true, y_pred):
     """ Bipartite ranking surrogate """
@@ -18,8 +18,16 @@ def ranksvm(y_true, y_pred):
 
 def cicerons_1504(y_true, y_pred):
     """ Bipartite ranking surrogate - http://arxiv.org/pdf/1504.06580v2.pdf """
-    return K.mean(K.log(1. + K.exp(2*(2.5 - y_true*y_pred))) +
-                  K.log(1. + K.exp(2*(0.5 + (1-y_true)*y_pred))), axis=-1)
+    mask_o = np.zeros((1, 1, 127))
+    mask_o[0, 0, -1] = 1
+    mask_r = np.ones((1, 1, 127))
+    mask_r[0, 0, -1] = 0
+    loss_o = K.log(1. + K.exp(2*(0.5 + (1-y_true*mask_o)*y_pred)))
+    loss_r = K.log(1. + K.exp(2*(2.5 - y_true*mask_r*y_pred))) + \
+             K.log(1. + K.exp(2*(0.5 + (1-y_true*mask_r)*y_pred)))
+    return loss_o + loss_r
+    # return K.mean(K.log(1. + K.exp(2*(2.5 - y_true*y_pred))) +
+    #               K.log(1. + K.exp(2*(0.5 + (1-y_true)*y_pred))), axis=-1)
 
 def categorical_crossentropy(y_true, y_pred):
     return K.categorical_crossentropy(y_true, y_pred)

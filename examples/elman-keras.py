@@ -14,7 +14,7 @@ sys.path.append('../')
 from is13.data import load
 from is13.metrics.accuracy import conlleval
 from is13.utils.tools import shuffle
-from is13.pysts.kerasts.objectives import categorical_crossentropy
+from is13.pysts.kerasts.objectives import cicerons_1504
 
 if __name__ == '__main__':
 
@@ -24,9 +24,9 @@ if __name__ == '__main__':
          'nhidden': 100,  # number of hidden units
          'seed': 345,
          'emb_dimension': 100,  # dimension of word embedding
-         'nepochs': 30}
+         'nepochs': 80}
 
-    s['loss'] = categorical_crossentropy
+    s['loss'] = cicerons_1504
 
     folder = os.path.join('out/', os.path.basename(__file__).split('.')[0])  # folder = 'out/elman-keras'
     os.makedirs(folder, exist_ok=True)
@@ -34,7 +34,7 @@ if __name__ == '__main__':
     # load the dataset
     train_set, valid_set, test_set, dic = load.atisfold(s['fold'])
     idx2label = dict((k, v) for v, k in dic['labels2idx'].items())
-    print(idx2label[74])
+    print(idx2label[126])
     idx2word = dict((k, v) for v, k in dic['words2idx'].items())
 
     train_lex, train_ne, train_y = train_set  # one-hot vector TODO Glove?
@@ -54,7 +54,8 @@ if __name__ == '__main__':
     # model.add(SimpleRNN(s['nhidden'], activation='sigmoid', return_sequences=True))
     model.add(Bidirectional(LSTM(s['nhidden'], activation='sigmoid', return_sequences=True)))
     model.add(TimeDistributed(Dense(units=nclasses)))
-    model.add(Activation("softmax"))
+    model.add(Dense(units=nclasses))
+    # model.add(Activation("softmax"))
 
     sgd = SGD(lr=s['lr'], momentum=0.0, decay=0.0, nesterov=False)
     #model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
